@@ -316,25 +316,6 @@ jobs:
           echo "rel_date=${RELDATE}" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: Update Latest
-        run: |
-          set -xe
-          shopt -s nullglob
-          mkdir latest_artifacts worktmpdir
-          sudo mount -o size=75%,uid="${UID}" -t tmpfs tmpfs ./worktmpdir
-          (cd worktmpdir && ../util/repack_latest.sh ../latest_artifacts ../artifacts/*.{zip,tar.xz})
-          (cd latest_artifacts && sha256sum *.{zip,tar.xz} > checksums.sha256)
-          NAME="Latest Auto-Build (${{ steps.create_release.outputs.rel_date }})"
-          TAGNAME="latest"
-          gh release delete --cleanup-tag --yes "$TAGNAME" || true
-          sleep 15
-          gh release create "$TAGNAME" --target "master" --title "$NAME" latest_artifacts/*
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-      - name: Update Wiki
-        run: ./util/update_wiki.sh artifacts ${{ steps.create_release.outputs.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - name: Prune old releases
         run: ./util/prunetags.sh
         env:
